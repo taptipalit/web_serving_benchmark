@@ -546,6 +546,7 @@ DROP TABLE IF EXISTS `elgg_sites_entity`;
 CREATE TABLE `elgg_sites_entity` (
   `guid` bigint(20) unsigned NOT NULL,
   `name` text NOT NULL,
+
   `description` text NOT NULL,
   `url` varchar(255) NOT NULL,
   PRIMARY KEY (`guid`),
@@ -560,7 +561,7 @@ CREATE TABLE `elgg_sites_entity` (
 
 LOCK TABLES `elgg_sites_entity` WRITE;
 /*!40000 ALTER TABLE `elgg_sites_entity` DISABLE KEYS */;
-INSERT INTO `elgg_sites_entity` VALUES (1,'Elgg_community','','http://whitbread/');
+INSERT INTO `elgg_sites_entity` VALUES (1,'Elgg_community','','http://HOST_IP/');
 /*!40000 ALTER TABLE `elgg_sites_entity` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -2,6 +2,7 @@ FROM ubuntu:14.04
 MAINTAINER Tapti Palit <tpalit@cs.stonybrook.edu>
 
 ENV root_password root
+ENV web_host spaten 
 
 # Install MySQL
 RUN echo mysql-server mysql-server/root_password password ${root_password} | sudo debconf-set-selections
@@ -16,6 +17,9 @@ RUN sed -i -e"s/^bind-address\s*=\s*127.0.0.1/bind-address = 0.0.0.0/" /etc/mysq
 # Copy the scripts
 ADD files/execute.sh /execute.sh
 ADD files/elgg_db.dump /elgg_db.dump
+
+# Update the hostname/IP to that of the webserver
+RUN sed -i -e"s/HOST_IP/${web_host}/" /elgg_db.dump
 
 RUN chmod a+x /execute.sh
 
