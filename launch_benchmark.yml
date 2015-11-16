@@ -1,0 +1,60 @@
+---
+- hosts: faban_client 
+  vars:
+    # The Faban benchmark parameters
+    scale: 7 
+    ramp_up_time: 10 
+    ramp_down_time: 10
+    steady_state_time: 30
+    server_ip: 10.22.17.31
+    server_port: 8080
+    output_dir: \/faban\/output
+ 
+    config_file_location: web_benchmark/docker_faban_client/
+  tasks: # Update the run.xml with the parameters. TODO - Figure out issue with multiline commands and run this as a single command
+  - name: Fix the /web20_benchmark/deploy/run.xml in the docker container (1)
+    command: docker exec faban_client sh -c "sed -i 's/<fa:scale.*/<fa:scale>{{scale}}<\\/fa:scale>/' /web20_benchmark/deploy/run.xml"
+    sudo: yes
+  - name: Fix the /web20_benchmark/deploy/run.xml in the docker container (2)
+    command: docker exec faban_client sh -c "sed -i 's/<fa:rampUp.*/<fa:rampUp>{{ramp_up_time}}<\\/fa:rampUp>/' /web20_benchmark/deploy/run.xml"
+    sudo: yes
+  - name: Fix the /web20_benchmark/deploy/run.xml in the docker container (3)
+    command: docker exec faban_client sh -c "sed -i 's/<fa:rampDown.*/<fa:rampDown>{{ramp_down_time}}<\\/fa:rampDown>/' /web20_benchmark/deploy/run.xml"
+    sudo: yes
+  - name: Fix the /web20_benchmark/deploy/run.xml in the docker container (4)
+    command: docker exec faban_client sh -c "sed -i 's/<fa:steadyState.*/<fa:steadyState>{{steady_state_time}}<\\/fa:steadyState>/' /web20_benchmark/deploy/run.xml;"
+    sudo: yes
+  - name: Fix the /web20_benchmark/deploy/run.xml in the docker container (5)
+    command: docker exec faban_client sh -c "sed -i 's/<host.*/<host>{{server_ip}}<\\/host>/' /web20_benchmark/deploy/run.xml;"
+    sudo: yes
+  - name: Fix the /web20_benchmark/deploy/run.xml in the docker container (6)
+    command: docker exec faban_client sh -c "sed -i 's/<port.*/<port>{{server_port}}<\\/port>/' /web20_benchmark/deploy/run.xml;" 
+    sudo: yes
+  - name: Fix the /web20_benchmark/deploy/run.xml in the docker container (7)
+    command: docker exec faban_client sh -c "sed -i 's/<outputDir.*/<outputDir>{{output_dir}}<\\/outputDir>/' /web20_benchmark/deploy/run.xml;" 
+    sudo: yes
+
+
+- hosts: mysql_server
+  vars:
+    root_password: root
+  tasks: 
+  - name: Copy over the database file to remote
+    copy: src=./elgg_ready_dump.sql dest=web_benchmark/ 
+  - name: Copy the database file into the docker
+    command: docker cp web_benchmark/elgg_ready_dump.sql mysql_server:/elgg_restore.sql
+  - name: Restore the ELGG database
+    command: docker exec mysql_server sh -c "mysql -u root -p{{root_password}} ELGG_DB < /elgg_restore.sql"
+
+- hosts: faban_client
+  vars:
+    output_dir: \/faban\/output
+  tasks:
+  - name: Clear the output directory
+    command: docker exec faban_client rm -rf {{output_dir}}
+  - name: Launch the benchmark
+    command: docker exec faban_client sh -c "cd /web20_benchmark; ant run"
+  - name: Copy over the results from the Docker container
+    shell: docker exec faban_client sh -c "cat /faban/output/*/summary.xml" > summary.xml 
+  - name: Copy over the results from the remote machine
+    fetch: src=summary.xml dest=./  flat=yes

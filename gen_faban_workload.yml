@@ -1,0 +1,30 @@
+---
+- hosts: faban_client 
+  vars:
+    # Need this to be able to create the websites
+    php_server: 10.22.17.31
+    config_file_location: web_benchmark/docker_faban_client/
+    scale: 10
+  tasks:
+  - name: Replace the number of users to create 
+    lineinfile: dest={{config_file_location}}/files/usersetup.properties regexp=^num_users= line=num_users={{scale}}
+  - name: Copy over the usersetup.properties to the docker container 
+    command: docker cp {{config_file_location}}/files/usersetup.properties faban_client:/faban/usersetup.properties
+    sudo: yes
+  - name: Launch the usergen script to create the users on Elgg engine
+    command: docker exec faban_client sh -c "cd /web20_benchmark/build; java -jar Usergen.jar http://{{php_server}}:8080"
+    sudo: yes
+
+- hosts: mysql_server
+  vars:
+    database_root_password: root
+  tasks:
+  - name: Backup the database state
+    command: docker exec mysql_server sh -c "mysqldump -u root -p{{database_root_password}} ELGG_DB > /elgg_ready_dump.sql"
+    sudo: yes
+  - name: Copy over the database file (1)
+    command: docker cp mysql_server:/elgg_ready_dump.sql ./
+  - name: Copy over the database file (2)
+    fetch: src=elgg_ready_dump.sql dest=./ flat=yes
+
+    
