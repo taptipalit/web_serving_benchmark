@@ -57,7 +57,7 @@ $CONFIG->dbname = 'ELGG_DB';
  *
  * @global string $CONFIG->dbhost
  */
-$CONFIG->dbhost = '192.168.1.3';
+$CONFIG->dbhost = '10.22.17.31';
 
 /**
  * The database prefix
@@ -109,7 +109,7 @@ $CONFIG->memcache = true;
 //
 $CONFIG->memcache_servers = array (
 //	array('server1', 11211),
-	array('192.168.3.2', 11211)
+	array('10.22.17.71', 11211)
 );
 
 

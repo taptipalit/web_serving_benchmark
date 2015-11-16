@@ -18,56 +18,66 @@
   tasks:
   - name: Create /web_server
     file: path=/web_server state=directory
+    sudo: yes
   - name: Remove docker container named php_server if it exists
-    command: sudo docker rm -f php_server
+    command: docker rm -f php_server
     sudo: yes
     ignore_errors: yes
   - name: Build the PHP docker
-    command: sudo docker build -t php_server web_benchmark/docker_web_server
+    command: docker build -t php_server web_benchmark/docker_web_server
     sudo: yes
   - name: Run the PHP docker
-    command: sudo docker run -d -t --net=host --privileged=true --name=php_server php_server
+    command: docker run -d -t --net=host --privileged=true --name=php_server php_server
     sudo: yes
+  - name: Start the PHP5-FPM service
+    command: docker exec php_server service php5-fpm restart
+    sudo: yes
+  - name: Start the Nginx service
+    command: docker exec php_server service nginx restart
 
 - hosts: mysql_server
   tasks:
   - name: Create /web_server
     file: path=/web_server state=directory
+    sudo: eys
   - name: Remove docker container named mysql_server if it exists
-    command: sudo docker rm -f mysql_server
+    command: docker rm -f mysql_server
     sudo: yes
     ignore_errors: yes
   - name: Build the MySql docker
-    command: sudo docker build -t mysql_server web_benchmark/docker_db_server
+    command: docker build -t mysql_server web_benchmark/docker_db_server
     sudo: yes
   - name: Run the MySQL docker
-    command: sudo docker run -d -t --net=host --privileged=true --name=mysql_server mysql_server
+    command: docker run -d -t --net=host --privileged=true --name=mysql_server mysql_server
     sudo: yes
 
 - hosts: memcache_server
   tasks:
   - name: Create /web_server
     file: path=/web_server state=directory
+    sudo: yes
   - name: Remove docker container named memcache_server if it exists
-    command: sudo docker rm -f memcache_server
+    command: docker rm -f memcache_server
     sudo: yes
     ignore_errors: yes
   - name: Build the Memcached docker
-    command: sudo docker build -t memcache_server web_benchmark/docker_memcached
+    command: docker build -t memcache_server web_benchmark/docker_memcached
     sudo: yes
   - name: Run the Memcached docker
-    command: sudo docker run -d -t --net=host --privileged=true --name=memcache_server memcache_server
+    command: docker run -d -t --net=host --privileged=true --name=memcache_server memcache_server
     sudo: yes
 
 - hosts: faban_client 
   tasks:
   - name: Remove docker container named faban_client if it exists
-    command: sudo docker rm -f faban_client
+    command: docker rm -f faban_client
     sudo: yes
     ignore_errors: yes
   - name: Build the faban client docker
-    command: sudo docker build -t faban_client web_benchmark/docker_faban
+    command: docker build -t faban_client web_benchmark/docker_faban_client
     sudo: yes
   - name: Run the Faban client docker
-    command: sudo docker run -d -t --net=host --privileged=true --name=faban_client faban_client
+    command: docker run -d -t --net=host --privileged=true --name=faban_client faban_client
     sudo: yes
+  - name: Ensure that the faban server is running
+    command: docker exec faban_client /faban/master/bin/startup.sh 
