@@ -1,8 +1,6 @@
 FROM ubuntu:14.04
 MAINTAINER Tapti Palit <tpalit@cs.stonybrook.edu>
 
-ENV web_server 192.168.100.3
-
 RUN apt-get update && apt-get install -y \
 	ant \
 	build-essential \

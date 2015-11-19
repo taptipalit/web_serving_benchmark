@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 MAINTAINER Tapti Palit <tpalit@cs.stonybrook.edu>
 
 ENV root_password root
-ENV web_host shocktop 
+ENV web_host 10.0.0.3 
 
 # Install MySQL
 RUN echo mysql-server mysql-server/root_password password ${root_password} | sudo debconf-set-selections

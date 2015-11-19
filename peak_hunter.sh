@@ -5,7 +5,7 @@ maxScale=$2
 
 function launchRemote () {
 	scale="$1"
-	ansible-playbook -i ansibile-inventory.ini -v gen_faban_workload.yml --extra-vars "scale=$scale"
+	ansible-playbook -i ansible-inventory.ini -v gen_faban_workload.yml --extra-vars "scale=$scale"
 	ansible-playbook -i ansible-inventory.ini -v launch_benchmark.yml --extra-vars "scale=$scale"
 	grep -q "<passed>false</passed>" summary.xml
 	if grep -q "<passed>false</passed>" summary.xml; then
@@ -14,7 +14,6 @@ function launchRemote () {
 		benchmarkSuccess=1
 	fi
 }
-
 
 # Test for minScale
 launchRemote $minScale
@@ -26,7 +25,7 @@ then
   exit 0
 else
   echo "Benchmark succeeded for $minScale sessions"
-
+fi
 # Test for minScale
 launchRemote $maxScale
 
@@ -38,7 +37,6 @@ then
 else
   echo "Benchmark failed for $maxScale sessions"
 fi
-
 
 minNumSessions=$minScale
 maxNumSessions=$maxScale

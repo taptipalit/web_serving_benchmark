@@ -28,8 +28,6 @@ RUN chmod a+rw /elgg_data
 COPY files/nginx_sites_avail.append /tmp/
 RUN cat /tmp/nginx_sites_avail.append >> /etc/nginx/sites-available/default
 
-#RUN echo "daemon off;" >> /etc/nginx/nginx.conf
-
 RUN service nginx restart
 
 RUN service php5-fpm restart
